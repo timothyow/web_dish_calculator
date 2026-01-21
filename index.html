@@ -138,90 +138,126 @@
     <button onclick="acceptConsent()">Accept & Continue</button>
   </div>
 
-  <script>
-    const consentKey = "negosyo_consent";
+ <script>
+  const consentKey = "negosyo_consent";
 
-    function calculate() {
-      const ingredients = Number(ingredientCost.value) || 0;
-      const servingsVal = Math.max(1, Number(servings.value) || 1);
-      const packagingCost = (Number(packaging.value) || 0) * servingsVal;
-      const utilitiesCost = Number(utilities.value) || 0;
-      const laborCost = Number(labor.value) || 0;
+  // Grab DOM elements explicitly (fixes “not calculating” issues)
+  const elDish = document.getElementById("dish");
+  const elIngredientCost = document.getElementById("ingredientCost");
+  const elServings = document.getElementById("servings");
+  const elPackaging = document.getElementById("packaging");
+  const elUtilities = document.getElementById("utilities");
+  const elLabor = document.getElementById("labor");
+  const elPrice = document.getElementById("price");
 
-      const totalBatchCost = ingredients + packagingCost + utilitiesCost + laborCost;
-      const costServing = totalBatchCost / servingsVal;
-      const sellPrice = Number(price.value) || 0;
+  const elCostPerServing = document.getElementById("costPerServing");
+  const elProfit = document.getElementById("profit");
+  const elMargin = document.getElementById("margin");
+  const elConsent = document.getElementById("consent");
 
-      const profit = sellPrice - costServing;
-      const margin = sellPrice > 0 ? (profit / sellPrice) * 100 : 0;
+  function n(v) {
+    const x = Number(v);
+    return Number.isFinite(x) ? x : 0;
+  }
 
-      costPerServing.textContent = "₱" + costServing.toFixed(2);
-      profit.textContent = "₱" + profit.toFixed(2);
-      margin.textContent = margin.toFixed(1) + "%";
+  function hasConsent() {
+    return localStorage.getItem(consentKey) === "yes";
+  }
 
-      track("calculate_results_viewed", {
-        dish_name: dish.value,
-        cost_per_serving: costServing,
-        selling_price: sellPrice,
-        margin_percent: margin,
-        servings_per_batch: servingsVal
-      });
+  function initAnalytics() {
+    if (GA_ID) {
+      const s = document.createElement("script");
+      s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+      s.async = true;
+      document.head.appendChild(s);
+
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){ window.dataLayer.push(arguments); };
+      gtag("js", new Date());
+      gtag("config", GA_ID, { anonymize_ip: true });
     }
 
-    document.querySelectorAll("input, select").forEach(el =>
-      el.addEventListener("input", calculate)
-    );
+    // (Optional) If you later paste Meta/TikTok pixel loaders, do it here too.
+  }
 
-    function share() {
-      const text =
-        `Dish: ${dish.value}\n` +
-        `Cost/serving: ${costPerServing.textContent}\n` +
-        `Selling price: ₱${price.value}\n` +
-        `Margin: ${margin.textContent}`;
+  function track(event, params) {
+    if (!hasConsent()) return;
+    if (window.gtag) gtag("event", event, params);
+    if (window.fbq) fbq("trackCustom", event, params);
+    if (window.ttq) ttq.track(event, params);
+  }
 
-      navigator.clipboard.writeText(text);
+  function calculate() {
+    const ingredients = n(elIngredientCost.value);
+    const servingsVal = Math.max(1, n(elServings.value));
+    const packagingTotal = n(elPackaging.value) * servingsVal;
+    const utilitiesCost = n(elUtilities.value);
+    const laborCost = n(elLabor.value);
+
+    const totalBatchCost = ingredients + packagingTotal + utilitiesCost + laborCost;
+    const costServing = totalBatchCost / servingsVal;
+
+    const sellPrice = n(elPrice.value);
+    const profit = sellPrice - costServing;
+    const margin = sellPrice > 0 ? (profit / sellPrice) * 100 : 0;
+
+    elCostPerServing.textContent = "₱" + costServing.toFixed(2);
+    elProfit.textContent = "₱" + profit.toFixed(2);
+    elMargin.textContent = margin.toFixed(1) + "%";
+  }
+
+  async function share() {
+    const text =
+      `Dish: ${elDish.value}\n` +
+      `Cost/serving: ${elCostPerServing.textContent}\n` +
+      `Selling price: ₱${elPrice.value}\n` +
+      `Margin: ${elMargin.textContent}`;
+
+    try {
+      await navigator.clipboard.writeText(text);
       alert("Copied to clipboard");
-      track("share_clicked", { dish_name: dish.value });
+      track("share_clicked", { dish_name: elDish.value });
+    } catch {
+      alert("Copy failed. Please copy manually.");
     }
+  }
 
-    function acceptConsent() {
-      localStorage.setItem(consentKey, "yes");
-      document.getElementById("consent").style.display = "none";
-      initAnalytics();
-    }
+  // Make share() available to the button onclick
+  window.share = share;
 
-    function hasConsent() {
-      return localStorage.getItem(consentKey) === "yes";
-    }
+  function acceptConsent() {
+    localStorage.setItem(consentKey, "yes");
+    elConsent.style.display = "none";
+    initAnalytics();
+  }
 
-    function initAnalytics() {
-      if (GA_ID) {
-        const s = document.createElement("script");
-        s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
-        s.async = true;
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function(){dataLayer.push(arguments)};
-        gtag("js", new Date());
-        gtag("config", GA_ID, { anonymize_ip: true });
-      }
-    }
+  window.acceptConsent = acceptConsent;
 
-    function track(event, params) {
-      if (!hasConsent()) return;
-      if (window.gtag) gtag("event", event, params);
-      if (window.fbq) fbq("trackCustom", event, params);
-      if (window.ttq) ttq.track(event, params);
-    }
+  // Recalculate on any input changes
+  document.querySelectorAll("input, select").forEach((el) => {
+    el.addEventListener("input", () => {
+      calculate();
+      track("calculate_results_viewed", {
+        dish_name: elDish.value,
+        cost_per_serving: Number(elCostPerServing.textContent.replace("₱","")) || 0,
+        selling_price: n(elPrice.value),
+        margin_percent: Number(elMargin.textContent.replace("%","")) || 0,
+        servings_per_batch: Math.max(1, n(elServings.value))
+      });
+    });
+  });
 
-    if (!hasConsent()) {
-      document.getElementById("consent").style.display = "block";
-    } else {
-      initAnalytics();
-    }
+  // Consent banner
+  if (!hasConsent()) {
+    elConsent.style.display = "block";
+  } else {
+    initAnalytics();
+  }
 
-    calculate();
-  </script>
+  // First render
+  calculate();
+</script>
+
 
 </body>
 </html>
