@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Negosyo Dish Costing Calculator</title>
+
+  <!-- ====== BASIC MOBILE STYLES ====== -->
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      padding: 16px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      display: block;
+      margin-top: 8px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+    }
+    button {
+      background: #0f172a;
+      color: white;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+    .row > div {
+      flex: 1;
+    }
+    .result {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .small {
+      font-size: 12px;
+      color: #64748b;
+    }
+    #consent {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 12px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,.15);
+    }
+  </style>
+
+  <!-- ====== ANALYTICS PLACEHOLDERS ====== -->
+  <!-- Replace IDs before publishing -->
+  <script>
+    const GA_ID = "";          // G-XXXX
+    const META_PIXEL_ID = "";  // 123456
+    const TIKTOK_PIXEL_ID = ""; // ABC123
+  </script>
+</head>
+
+<body>
+
+  <h1>Negosyo Dish Costing Calculator</h1>
+  <p class="small">Simple costing tool for PH mompreneurs (₱ PHP)</p>
+
+  <div class="card">
+    <label>Dish</label>
+    <select id="dish">
+      <option>Halo-halo</option>
+      <option>Samalamig / Fruit Shake</option>
+      <option>Leche Flan</option>
+      <option>Spaghetti / Carbonara</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <label>Total ingredient cost (₱)</label>
+    <input type="number" id="ingredientCost" value="0" />
+    
+    <label>Servings per batch</label>
+    <input type="number" id="servings" value="10" />
+
+    <label>Packaging cost per serving (₱)</label>
+    <input type="number" id="packaging" value="2" />
+
+    <label>Gas / electricity per batch (₱)</label>
+    <input type="number" id="utilities" value="10" />
+
+    <label>Labor per batch (₱)</label>
+    <input type="number" id="labor" value="0" />
+  </div>
+
+  <div class="card">
+    <label>Selling price per serving (₱)</label>
+    <input type="number" id="price" value="0" />
+  </div>
+
+  <div class="card">
+    <div>Cost per serving</div>
+    <div class="result" id="costPerServing">₱0.00</div>
+
+    <div style="margin-top:8px;">Profit per serving</div>
+    <div class="result" id="profit">₱0.00</div>
+
+    <div style="margin-top:8px;">Margin</div>
+    <div class="result" id="margin">0%</div>
+
+    <button style="margin-top:12px;" onclick="share()">Share summary</button>
+  </div>
+
+  <!-- ====== CONSENT BANNER ====== -->
+  <div id="consent" style="display:none;">
+    <p class="small">
+      This site uses anonymous analytics (GA4, Meta, TikTok). No personal data collected.
+    </p>
+    <button onclick="acceptConsent()">Accept & Continue</button>
+  </div>
+
+  <script>
+    const consentKey = "negosyo_consent";
+
+    function calculate() {
+      const ingredients = Number(ingredientCost.value) || 0;
+      const servingsVal = Math.max(1, Number(servings.value) || 1);
+      const packagingCost = (Number(packaging.value) || 0) * servingsVal;
+      const utilitiesCost = Number(utilities.value) || 0;
+      const laborCost = Number(labor.value) || 0;
+
+      const totalBatchCost = ingredients + packagingCost + utilitiesCost + laborCost;
+      const costServing = totalBatchCost / servingsVal;
+      const sellPrice = Number(price.value) || 0;
+
+      const profit = sellPrice - costServing;
+      const margin = sellPrice > 0 ? (profit / sellPrice) * 100 : 0;
+
+      costPerServing.textContent = "₱" + costServing.toFixed(2);
+      profit.textContent = "₱" + profit.toFixed(2);
+      margin.textContent = margin.toFixed(1) + "%";
+
+      track("calculate_results_viewed", {
+        dish_name: dish.value,
+        cost_per_serving: costServing,
+        selling_price: sellPrice,
+        margin_percent: margin,
+        servings_per_batch: servingsVal
+      });
+    }
+
+    document.querySelectorAll("input, select").forEach(el =>
+      el.addEventListener("input", calculate)
+    );
+
+    function share() {
+      const text =
+        `Dish: ${dish.value}\n` +
+        `Cost/serving: ${costPerServing.textContent}\n` +
+        `Selling price: ₱${price.value}\n` +
+        `Margin: ${margin.textContent}`;
+
+      navigator.clipboard.writeText(text);
+      alert("Copied to clipboard");
+      track("share_clicked", { dish_name: dish.value });
+    }
+
+    function acceptConsent() {
+      localStorage.setItem(consentKey, "yes");
+      document.getElementById("consent").style.display = "none";
+      initAnalytics();
+    }
+
+    function hasConsent() {
+      return localStorage.getItem(consentKey) === "yes";
+    }
+
+    function initAnalytics() {
+      if (GA_ID) {
+        const s = document.createElement("script");
+        s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
+        s.async = true;
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function(){dataLayer.push(arguments)};
+        gtag("js", new Date());
+        gtag("config", GA_ID, { anonymize_ip: true });
+      }
+    }
+
+    function track(event, params) {
+      if (!hasConsent()) return;
+      if (window.gtag) gtag("event", event, params);
+      if (window.fbq) fbq("trackCustom", event, params);
+      if (window.ttq) ttq.track(event, params);
+    }
+
+    if (!hasConsent()) {
+      document.getElementById("consent").style.display = "block";
+    } else {
+      initAnalytics();
+    }
+
+    calculate();
+  </script>
+
+</body>
+</html>
