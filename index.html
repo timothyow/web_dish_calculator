@@ -1,263 +1,419 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Negosyo Dish Costing Calculator</title>
-
-  <!-- ====== BASIC MOBILE STYLES ====== -->
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>Negosyo Dish Costing Calculator — Minimal (3 Dishes)</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f8fafc;
-      margin: 0;
-      padding: 16px;
+    :root{
+      --bg:#f8fafc;--panel:#fff;--muted:#64748b;--text:#0f172a;--border:#e2e8f0;
+      --accent:#0f172a;--accentText:#fff;--radius:14px;
     }
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:var(--bg);color:var(--text)}
+    header,footer{background:var(--panel);border-bottom:1px solid var(--border)}
+    footer{border-top:1px solid var(--border);border-bottom:none}
+    .container{max-width:1200px;margin:0 auto;padding:16px}
+    h1{font-size:16px;margin:0}
+    .sub{font-size:12px;color:var(--muted)}
+    .grid{display:grid;gap:16px}
+    @media (min-width: 768px){ .grid-md-2{grid-template-columns: repeat(2,minmax(0,1fr));} }
+    @media (min-width: 1024px){ .grid-lg-3{grid-template-columns: repeat(3,minmax(0,1fr));} }
+
+    .card{
+      background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+      box-shadow:0 1px 2px rgba(0,0,0,.04);
     }
-    h1 {
-      font-size: 22px;
-      margin-bottom: 4px;
+    .card-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-bd{padding:16px}
+    .label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .input, .select{
+      width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff;font-size:14px;color:var(--text);
     }
-    label {
-      font-size: 13px;
-      font-weight: 600;
-      display: block;
-      margin-top: 8px;
+    .row{display:grid;gap:12px}
+    .row-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#fff;color:var(--text);font-size:14px;cursor:pointer;
     }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 4px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: 1px solid #cbd5e1;
+    .btn-xs{padding:6px 8px;font-size:12px}
+    .btn-solid{background:var(--accent);color:var(--accentText);border-color:var(--accent)}
+    .muted{color:var(--muted);font-size:12px}
+    .metrics{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .metric{border:1px solid var(--border);background:#fff;border-radius:12px;padding:10px}
+    .metric .k{font-size:11px;color:var(--muted)}
+    .metric .v{font-size:16px;font-weight:700}
+    .pill{
+      display:inline-block;padding:4px 8px;font-size:11px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #fde68a
     }
-    button {
-      background: #0f172a;
-      color: white;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-    }
-    .row {
-      display: flex;
-      gap: 8px;
-    }
-    .row > div {
-      flex: 1;
-    }
-    .result {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .small {
-      font-size: 12px;
-      color: #64748b;
-    }
-    #consent {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      padding: 12px;
-      box-shadow: 0 -2px 10px rgba(0,0,0,.15);
-    }
+    .total-bar{display:flex;align-items:center;justify-content:space-between}
+    .switch{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+    .switch input{width:16px;height:16px}
+    .hr{height:1px;background:var(--border);margin:12px 0}
   </style>
-
-  <!-- ====== ANALYTICS PLACEHOLDERS ====== -->
-  <!-- Replace IDs before publishing -->
-  <script>
-    const GA_ID = "";          // G-XXXX
-    const META_PIXEL_ID = "";  // 123456
-    const TIKTOK_PIXEL_ID = ""; // ABC123
-  </script>
 </head>
-
 <body>
+  <header>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+      <h1>Negosyo Dish Costing Calculator</h1>
+      <span class="sub">Clean • Minimal • No tracking</span>
+    </div>
+  </header>
 
-  <h1>Negosyo Dish Costing Calculator</h1>
-  <p class="small">Simple costing tool for PH mompreneurs (₱ PHP)</p>
+  <main class="container">
+    <div class="grid grid-md-2 grid-lg-3" id="columns">
+      <!-- Column A -->
+      <section class="card" data-col="0">
+        <div class="card-hd">
+          <div class="title">Dish A</div>
+          <label class="switch">
+            <input type="checkbox" class="include-toggle" checked>
+            Include in total
+          </label>
+        </div>
+        <div class="card-bd">
+          <div class="row">
+            <div>
+              <label class="label">Dish</label>
+              <select class="select dish-select"></select>
+            </div>
+            <div class="row row-2">
+              <div>
+                <label class="label">Mode</label>
+                <div class="row row-2">
+                  <button class="btn btn-xs mode-btn" data-mode="negosyo">Negosyo</button>
+                  <button class="btn btn-xs mode-btn" data-mode="home">Home</button>
+                </div>
+              </div>
+              <div>
+                <label class="label">Season</label>
+                <div class="row row-2">
+                  <button class="btn btn-xs season-btn" data-season="year_round">Year-round</button>
+                  <button class="btn btn-xs season-btn" data-season="seasonal">Seasonal</button>
+                </div>
+              </div>
+            </div>
+          </div>
 
-  <div class="card">
-    <label>Dish</label>
-    <select id="dish">
-      <option>Halo-halo</option>
-      <option>Samalamig / Fruit Shake</option>
-      <option>Leche Flan</option>
-      <option>Spaghetti / Carbonara</option>
-    </select>
-  </div>
+          <div class="hr"></div>
 
-  <div class="card">
-    <label>Total ingredient cost (₱)</label>
-    <input type="number" id="ingredientCost" value="0" />
-    
-    <label>Servings per batch</label>
-    <input type="number" id="servings" value="10" />
+          <div class="row row-2">
+            <div>
+              <label class="label">Total ingredients cost / batch (₱)</label>
+              <input type="number" class="input field-ingredients" inputmode="decimal" value="0">
+            </div>
+            <div>
+              <label class="label">Packaging / serving (₱)</label>
+              <input type="number" class="input field-packaging" inputmode="decimal" value="5">
+            </div>
+            <div>
+              <label class="label">Servings / batch</label>
+              <input type="number" class="input field-servings" inputmode="decimal" value="10">
+            </div>
+            <div>
+              <label class="label">Wastage %</label>
+              <input type="number" class="input field-wastage" inputmode="decimal" value="5">
+            </div>
+            <div>
+              <label class="label">Gas/Electric / batch (₱)</label>
+              <input type="number" class="input field-utilities" inputmode="decimal" value="30">
+            </div>
+            <div>
+              <label class="label">Labor / batch (₱)</label>
+              <input type="number" class="input field-labor" inputmode="decimal" value="80">
+            </div>
+          </div>
 
-    <label>Packaging cost per serving (₱)</label>
-    <input type="number" id="packaging" value="2" />
+          <div class="hr"></div>
 
-    <label>Gas / electricity per batch (₱)</label>
-    <input type="number" id="utilities" value="10" />
+          <div class="row row-2">
+            <div>
+              <label class="label">Selling price / serving (₱)</label>
+              <input type="number" class="input field-price" inputmode="decimal" value="35">
+            </div>
+            <div>
+              <label class="label">Target margin (0–0.95)</label>
+              <input type="number" step="0.05" class="input field-target" inputmode="decimal" value="0.3">
+              <div class="muted">0.30 = 30%</div>
+            </div>
+          </div>
 
-    <label>Labor per batch (₱)</label>
-    <input type="number" id="labor" value="0" />
-  </div>
+          <div class="hr"></div>
 
-  <div class="card">
-    <label>Selling price per serving (₱)</label>
-    <input type="number" id="price" value="0" />
-  </div>
+          <div>
+            <h3 class="label" style="font-size:12px;color:var(--text);font-weight:600">Results</h3>
+            <div class="metrics">
+              <div class="metric"><div class="k">Total batch cost</div><div class="v res-batch">₱0.00</div></div>
+              <div class="metric"><div class="k">Servings (effective)</div><div class="v res-eff">0.0</div></div>
+              <div class="metric"><div class="k">Cost / serving</div><div class="v res-cps">₱0.00</div></div>
+              <div class="metric"><div class="k">Profit / serving</div><div class="v res-pps">₱0.00</div></div>
+              <div class="metric"><div class="k">Margin %</div><div class="v res-margin">0.0%</div></div>
+              <div class="metric"><div class="k">Profit / batch</div><div class="v res-ppb">₱0.00</div></div>
+              <div class="metric"><div class="k res-break-lbl">Break-even @ 30%</div><div class="v res-break">₱0.00</div></div>
+              <div class="metric"><div class="k">Ingredients share</div><div class="v res-ing-share">0.0%</div></div>
+            </div>
+            <div class="hr"></div>
+            <div class="row">
+              <div class="pill pill-low" style="display:none">Warning: Margin &lt; 20%</div>
+              <div class="pill pill-ing" style="display:none">Ingredients &gt; 40% of cost</div>
+              <div class="pill pill-pack" style="display:none">Packaging &gt; 10% of cost</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <div class="card">
-    <div>Cost per serving</div>
-    <div class="result" id="costPerServing">₱0.00</div>
+      <!-- Column B -->
+      <section class="card" data-col="1">
+        <div class="card-hd">
+          <div class="title">Dish B</div>
+          <label class="switch">
+            <input type="checkbox" class="include-toggle">
+            Include in total
+          </label>
+        </div>
+        <div class="card-bd">
+          <!-- Will be cloned from A for identical UI -->
+        </div>
+      </section>
 
-    <div style="margin-top:8px;">Profit per serving</div>
-    <div class="result" id="profit">₱0.00</div>
+      <!-- Column C -->
+      <section class="card" data-col="2">
+        <div class="card-hd">
+          <div class="title">Dish C</div>
+          <label class="switch">
+            <input type="checkbox" class="include-toggle">
+            Include in total
+          </label>
+        </div>
+        <div class="card-bd">
+          <!-- Will be cloned from A for identical UI -->
+        </div>
+      </section>
+    </div>
 
-    <div style="margin-top:8px;">Margin</div>
-    <div class="result" id="margin">0%</div>
+    <!-- Totals -->
+    <section class="card" style="margin-top:16px">
+      <div class="card-hd">
+        <h2 style="font-size:14px;margin:0">Totals</h2>
+      </div>
+      <div class="card-bd">
+        <div class="total-bar">
+          <div class="muted">Total profit (all included dishes)</div>
+          <div class="v" id="total-profit" style="font-size:18px;font-weight:700">₱0.00</div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-    <button style="margin-top:12px;" onclick="share()">Share summary</button>
-  </div>
+  <footer>
+    <div class="container" style="text-align:center;font-size:12px;color:var(--muted);">
+      For planning only — verify actual costs and yields.
+    </div>
+  </footer>
 
-  <!-- ====== CONSENT BANNER ====== -->
-  <div id="consent" style="display:none;">
-    <p class="small">
-      This site uses anonymous analytics (GA4, Meta, TikTok). No personal data collected.
-    </p>
-    <button onclick="acceptConsent()">Accept & Continue</button>
-  </div>
+  <script>
+    /**********************
+     * Simple Datasets
+     **********************/
+    const DISH_NAMES = [
+      'Halo-halo',
+      'Samalamig / Fruit Shake',
+      'Leche Flan',
+      'Spaghetti / Carbonara'
+    ];
 
- <script>
-  const consentKey = "negosyo_consent";
+    const currency = (n)=>`₱${(Number.isFinite(n)?n:0).toFixed(2)}`;
+    const safeNum = (v)=>{ const n = parseFloat(v); return Number.isFinite(n)&&n>=0 ? n : 0; };
 
-  // Grab DOM elements explicitly (fixes “not calculating” issues)
-  const elDish = document.getElementById("dish");
-  const elIngredientCost = document.getElementById("ingredientCost");
-  const elServings = document.getElementById("servings");
-  const elPackaging = document.getElementById("packaging");
-  const elUtilities = document.getElementById("utilities");
-  const elLabor = document.getElementById("labor");
-  const elPrice = document.getElementById("price");
-
-  const elCostPerServing = document.getElementById("costPerServing");
-  const elProfit = document.getElementById("profit");
-  const elMargin = document.getElementById("margin");
-  const elConsent = document.getElementById("consent");
-
-  function n(v) {
-    const x = Number(v);
-    return Number.isFinite(x) ? x : 0;
-  }
-
-  function hasConsent() {
-    return localStorage.getItem(consentKey) === "yes";
-  }
-
-  function initAnalytics() {
-    if (GA_ID) {
-      const s = document.createElement("script");
-      s.src = "https://www.googletagmanager.com/gtag/js?id=" + GA_ID;
-      s.async = true;
-      document.head.appendChild(s);
-
-      window.dataLayer = window.dataLayer || [];
-      window.gtag = function(){ window.dataLayer.push(arguments); };
-      gtag("js", new Date());
-      gtag("config", GA_ID, { anonymize_ip: true });
-    }
-
-    // (Optional) If you later paste Meta/TikTok pixel loaders, do it here too.
-  }
-
-  function track(event, params) {
-    if (!hasConsent()) return;
-    if (window.gtag) gtag("event", event, params);
-    if (window.fbq) fbq("trackCustom", event, params);
-    if (window.ttq) ttq.track(event, params);
-  }
-
-  function calculate() {
-    const ingredients = n(elIngredientCost.value);
-    const servingsVal = Math.max(1, n(elServings.value));
-    const packagingTotal = n(elPackaging.value) * servingsVal;
-    const utilitiesCost = n(elUtilities.value);
-    const laborCost = n(elLabor.value);
-
-    const totalBatchCost = ingredients + packagingTotal + utilitiesCost + laborCost;
-    const costServing = totalBatchCost / servingsVal;
-
-    const sellPrice = n(elPrice.value);
-    const profit = sellPrice - costServing;
-    const margin = sellPrice > 0 ? (profit / sellPrice) * 100 : 0;
-
-    elCostPerServing.textContent = "₱" + costServing.toFixed(2);
-    elProfit.textContent = "₱" + profit.toFixed(2);
-    elMargin.textContent = margin.toFixed(1) + "%";
-  }
-
-  async function share() {
-    const text =
-      `Dish: ${elDish.value}\n` +
-      `Cost/serving: ${elCostPerServing.textContent}\n` +
-      `Selling price: ₱${elPrice.value}\n` +
-      `Margin: ${elMargin.textContent}`;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      alert("Copied to clipboard");
-      track("share_clicked", { dish_name: elDish.value });
-    } catch {
-      alert("Copy failed. Please copy manually.");
-    }
-  }
-
-  // Make share() available to the button onclick
-  window.share = share;
-
-  function acceptConsent() {
-    localStorage.setItem(consentKey, "yes");
-    elConsent.style.display = "none";
-    initAnalytics();
-  }
-
-  window.acceptConsent = acceptConsent;
-
-  // Recalculate on any input changes
-  document.querySelectorAll("input, select").forEach((el) => {
-    el.addEventListener("input", () => {
-      calculate();
-      track("calculate_results_viewed", {
-        dish_name: elDish.value,
-        cost_per_serving: Number(elCostPerServing.textContent.replace("₱","")) || 0,
-        selling_price: n(elPrice.value),
-        margin_percent: Number(elMargin.textContent.replace("%","")) || 0,
-        servings_per_batch: Math.max(1, n(elServings.value))
-      });
+    /**********************
+     * State per column
+     **********************/
+    const initialRecipe = (dish='Halo-halo') => ({
+      included: false,
+      dishName: dish,
+      // simplified: single input for total ingredients cost
+      ingredientTotal: 0,        // PHP per batch
+      packagingPerServing: 5,    // PHP per serving
+      servingsPerBatch: 10,
+      wastagePercent: 5,
+      utilitiesPerBatch: 30,     // PHP per batch
+      laborPerBatch: 80,         // PHP per batch
+      sellingPrice: 35,          // PHP per serving
+      targetMargin: 0.3,         // 0..0.95
+      usageType: 'negosyo',
+      seasonalFlag: 'year_round'
     });
-  });
 
-  // Consent banner
-  if (!hasConsent()) {
-    elConsent.style.display = "block";
-  } else {
-    initAnalytics();
-  }
+    const state = [ initialRecipe('Halo-halo'), initialRecipe('Samalamig / Fruit Shake'), initialRecipe('Leche Flan') ];
+    state[0].included = true;
 
-  // First render
-  calculate();
-</script>
+    /**********************
+     * DOM helpers
+     **********************/
+    function qs(sel, root=document){ return root.querySelector(sel) }
+    function qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)) }
 
+    /**********************
+     * Calculations
+     **********************/
+    function calculateAll(s){
+      const servings = safeNum(s.servingsPerBatch);
+      const wastage = Math.min(100, safeNum(s.wastagePercent));
+      const effectiveServings = servings * (1 - wastage/100);
 
+      const packagingTotal = safeNum(s.packagingPerServing) * effectiveServings;
+      const ingredientsTotal = safeNum(s.ingredientTotal);
+      const utilities = safeNum(s.utilitiesPerBatch);
+      const labor = safeNum(s.laborPerBatch);
+
+      const totalBatchCost = ingredientsTotal + packagingTotal + utilities + labor;
+      const costPerServing = effectiveServings > 0 ? totalBatchCost / effectiveServings : 0;
+      const price = safeNum(s.sellingPrice);
+      const profitPerServing = price - costPerServing;
+      const marginPercent = price > 0 ? (profitPerServing / price) * 100 : 0;
+      const profitPerBatch = profitPerServing * effectiveServings;
+
+      const target = Math.max(0, Math.min(0.95, safeNum(s.targetMargin)));
+      const breakEvenAtTargetMargin = (1 - target) > 0 ? costPerServing / (1 - target) : costPerServing;
+
+      const ingredientShare = totalBatchCost > 0 ? ingredientsTotal / totalBatchCost : 0;
+      const packagingShare = totalBatchCost > 0 ? packagingTotal / totalBatchCost : 0;
+
+      return {
+        effectiveServings,
+        totalBatchCost,
+        costPerServing,
+        profitPerServing,
+        marginPercent,
+        profitPerBatch,
+        breakEvenAtTargetMargin,
+        ingredientShare,
+        packagingShare,
+        insights: {
+          lowMargin: marginPercent < 20,
+          ingredientShareHigh: ingredientShare > 0.4,
+          packagingShareHigh: packagingShare > 0.1
+        }
+      };
+    }
+
+    function recalc(index){
+      const section = qs(`[data-col="${index}"]`);
+      const s = state[index];
+
+      const calc = calculateAll(s);
+      qs('.res-batch', section).textContent = currency(calc.totalBatchCost);
+      qs('.res-eff', section).textContent = calc.effectiveServings.toFixed(1);
+      qs('.res-cps', section).textContent = currency(calc.costPerServing);
+      qs('.res-pps', section).textContent = currency(calc.profitPerServing);
+      qs('.res-margin', section).textContent = `${calc.marginPercent.toFixed(1)}%`;
+      qs('.res-ppb', section).textContent = currency(calc.profitPerBatch);
+      qs('.res-break', section).textContent = currency(calc.breakEvenAtTargetMargin);
+      qs('.res-break-lbl', section).textContent = `Break-even @ ${Math.round(s.targetMargin*100)}%`;
+      qs('.res-ing-share', section).textContent = `${(calc.ingredientShare*100).toFixed(1)}%`;
+
+      // insights
+      qs('.pill-low', section).style.display  = calc.insights.lowMargin ? '' : 'none';
+      qs('.pill-ing', section).style.display  = calc.insights.ingredientShareHigh ? '' : 'none';
+      qs('.pill-pack', section).style.display = calc.insights.packagingShareHigh ? '' : 'none';
+    }
+
+    function recalcTotals(){
+      let sum = 0;
+      state.forEach((s)=>{ if (s.included) sum += calculateAll(s).profitPerBatch; });
+      qs('#total-profit').textContent = currency(sum);
+    }
+
+    /**********************
+     * Column init
+     **********************/
+    function initColumn(section, index){
+      const s = state[index];
+      const body = qs('.card-bd', section);
+
+      // Clone inner from column 0 for identical structure
+      if (index > 0) { body.innerHTML = qs('[data-col="0"] .card-bd').innerHTML; }
+
+      // Fill dish choices
+      const select = qs('.dish-select', section);
+      select.innerHTML = DISH_NAMES.map(n=>`<option value="${n}">${n}</option>`).join('');
+      select.value = s.dishName;
+      select.addEventListener('change', ()=>{ s.dishName = select.value; });
+
+      // Include toggle
+      const include = qs('.include-toggle', section);
+      include.checked = s.included;
+      include.addEventListener('change', ()=>{ s.included = include.checked; recalc(index); recalcTotals(); });
+
+      // Mode buttons
+      qsa('.mode-btn', section).forEach(btn=>{
+        const sync = ()=>qsa('.mode-btn', section).forEach(b=>{
+          b.classList.toggle('btn-solid', b.dataset.mode === s.usageType);
+        });
+        btn.addEventListener('click', ()=>{ s.usageType = btn.dataset.mode; sync(); });
+        sync();
+      });
+
+      // Season buttons
+      qsa('.season-btn', section).forEach(btn=>{
+        const sync = ()=>qsa('.season-btn', section).forEach(b=>{
+          b.classList.toggle('btn-solid', b.dataset.season === s.seasonalFlag);
+        });
+        btn.addEventListener('click', ()=>{ s.seasonalFlag = btn.dataset.season; sync(); });
+        sync();
+      });
+
+      // Fields
+      const fIng  = qs('.field-ingredients', section);
+      const fPack = qs('.field-packaging', section);
+      const fServ = qs('.field-servings', section);
+      const fWast = qs('.field-wastage', section);
+      const fUtil = qs('.field-utilities', section);
+      const fLab  = qs('.field-labor', section);
+      const fPrice= qs('.field-price', section);
+      const fTarg = qs('.field-target', section);
+
+      fIng.value  = s.ingredientTotal;
+      fPack.value = s.packagingPerServing;
+      fServ.value = s.servingsPerBatch;
+      fWast.value = s.wastagePercent;
+      fUtil.value = s.utilitiesPerBatch;
+      fLab.value  = s.laborPerBatch;
+      fPrice.value= s.sellingPrice;
+      fTarg.value = s.targetMargin;
+
+      const onNum = (fn)=> (e)=>{ fn(safeNum(e.target.value)); recalc(index); recalcTotals(); };
+      fIng.addEventListener('input', onNum(v=>s.ingredientTotal=v));
+      fPack.addEventListener('input', onNum(v=>s.packagingPerServing=v));
+      fServ.addEventListener('input', onNum(v=>s.servingsPerBatch=v));
+      fWast.addEventListener('input', onNum(v=>s.wastagePercent=v));
+      fUtil.addEventListener('input', onNum(v=>s.utilitiesPerBatch=v));
+      fLab .addEventListener('input', onNum(v=>s.laborPerBatch=v));
+      fPrice.addEventListener('input', onNum(v=>s.sellingPrice=v));
+      fTarg.addEventListener('input', (e)=>{
+        let v = safeNum(e.target.value);
+        v = Math.max(0, Math.min(0.95, v));
+        s.targetMargin = v;
+        qs('.res-break-lbl', section).textContent = `Break-even @ ${Math.round(v*100)}%`;
+        recalc(index); recalcTotals();
+      });
+
+      recalc(index);
+    }
+
+    function boot(){
+      initColumn(qs('[data-col="0"]'), 0);
+      initColumn(qs('[data-col="1"]'), 1);
+      initColumn(qs('[data-col="2"]'), 2);
+      recalcTotals();
+    }
+    document.addEventListener('DOMContentLoaded', boot);
+  </script>
 </body>
 </html>
