@@ -12,11 +12,15 @@
       --bg:#f8fafc;--panel:#fff;--muted:#64748b;--text:#0f172a;--border:#e2e8f0;
       --accent:#0f172a;--accentText:#fff;--radius:14px;
       --fb:#1877f2; --fbText:#fff;
+      --warnBg:#fef3c7; --warnText:#92400e; --warnBorder:#fde68a;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background:var(--bg);color:var(--text)}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:var(--bg);color:var(--text)
+    }
     header,footer{background:var(--panel);border-bottom:1px solid var(--border)}
     footer{border-top:1px solid var(--border);border-bottom:none}
     .container{max-width:1200px;margin:0 auto;padding:16px}
@@ -30,7 +34,10 @@
       background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
       box-shadow:0 1px 2px rgba(0,0,0,.04);
     }
-    .card-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .card-hd{
+      padding:12px 16px;border-bottom:1px solid var(--border);
+      display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+    }
     .card-bd{padding:16px}
     .label{font-size:12px;color:var(--muted);margin-bottom:6px}
     .input, .select{
@@ -51,8 +58,10 @@
     .metric .k{font-size:11px;color:var(--muted)}
     .metric .v{font-size:16px;font-weight:700}
     .pill{
-      display:inline-block;padding:4px 8px;font-size:11px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #fde68a
+      display:inline-block;padding:6px 10px;font-size:11px;border-radius:999px;
+      background:var(--warnBg);color:var(--warnText);border:1px solid var(--warnBorder)
     }
+    .pill-row{display:flex;flex-wrap:wrap;gap:8px}
     .total-bar{display:flex;align-items:center;justify-content:space-between}
     .switch{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
     .switch input{width:16px;height:16px}
@@ -73,17 +82,12 @@
   <header>
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
       <h1>Negosyo Dish Costing Calculator</h1>
-      <div style="display:flex;align-items:center;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span class="sub">Clean • Minimal • No tracking</span>
         <!-- Header Quick Join -->
-        <a
-          class="btn btn-xs btn-fb"
-          href="https://www.facebook.com/share/1CDjm7GsyK/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Join the Mompreneur FB Community"
-          title="Join the Mompreneur FB Community"
-        >Join FB Community</a>
+        <a class="btn btn-xs btn-fb" href="https://www.facebook.com/share/1CDjm7GsyK/" target="_blank" rel="noopener noreferrer">
+          Join FB Community
+        </a>
       </div>
     </div>
   </header>
@@ -178,13 +182,14 @@
               <div class="metric"><div class="k">Margin %</div><div class="v res-margin">0.0%</div></div>
               <div class="metric"><div class="k">Profit / batch</div><div class="v res-ppb">₱0.00</div></div>
               <div class="metric"><div class="k res-break-lbl">Break-even @ 30%</div><div class="v res-break">₱0.00</div></div>
-              <div class="metric"><div class="k">Ingredients share</div><div class="v res-ing-share">0.0%</div></div>
             </div>
+
+            <!-- Insights row (now working) -->
             <div class="hr"></div>
-            <div class="row">
-              <div class="pill pill-low" style="display:none">Warning: Margin &lt; 20%</div>
-              <div class="pill pill-ing" style="display:none">Ingredients &gt; 40% of cost</div>
-              <div class="pill pill-pack" style="display:none">Packaging &gt; 10% of cost</div>
+            <div class="pill-row">
+              <span class="pill pill-low"   style="display:none">Warning: Margin &lt; 20%</span>
+              <span class="pill pill-ing"   style="display:none">Ingredients &gt; 40% of cost</span>
+              <span class="pill pill-pack"  style="display:none">Packaging &gt; 10% of cost</span>
             </div>
           </div>
         </div>
@@ -238,18 +243,13 @@
         <div>
           <div class="cta-title">Join our Mompreneur FB Community 💛</div>
           <div class="cta-text">
-            Learn pricing tips, share supplier finds, and get feedback on your menu. 
-            Kwentuhan every week—lahat welcome, beginners to pros!
+            Learn pricing tips, share supplier finds, and get feedback on your menu.
+            Weekly kwentuhan — lahat welcome, beginners to pros!
           </div>
         </div>
-        <a
-          class="btn btn-fb"
-          href="https://www.facebook.com/share/1CDjm7GsyK/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Join the Mompreneur FB Community on Facebook"
-          title="Join the Mompreneur FB Community"
-        >Join Now on Facebook</a>
+        <a class="btn btn-fb" href="https://www.facebook.com/share/1CDjm7GsyK/" target="_blank" rel="noopener noreferrer">
+          Join Now on Facebook
+        </a>
       </div>
     </section>
   </main>
@@ -280,8 +280,7 @@
     const initialRecipe = (dish='Halo-halo') => ({
       included: false,
       dishName: dish,
-      // simplified: single input for total ingredients cost
-      ingredientTotal: 0,        // PHP per batch
+      ingredientTotal: 0,        // PHP per batch (simplified)
       packagingPerServing: 5,    // PHP per serving
       servingsPerBatch: 10,
       wastagePercent: 5,
@@ -293,7 +292,11 @@
       seasonalFlag: 'year_round'
     });
 
-    const state = [ initialRecipe('Halo-halo'), initialRecipe('Samalamig / Fruit Shake'), initialRecipe('Leche Flan') ];
+    const state = [
+      initialRecipe('Halo-halo'),
+      initialRecipe('Samalamig / Fruit Shake'),
+      initialRecipe('Leche Flan')
+    ];
     state[0].included = true;
 
     /**********************
@@ -303,7 +306,7 @@
     function qsa(sel, root=document){ return Array.from(root.querySelectorAll(sel)) }
 
     /**********************
-     * Calculations
+     * Calculations (with insight flags)
      **********************/
     function calculateAll(s){
       const servings = safeNum(s.servingsPerBatch);
@@ -346,6 +349,13 @@
       };
     }
 
+    function updateInsights(section, calc){
+      // show/hide insight pills based on flags
+      qs('.pill-low', section).style.display  = calc.insights.lowMargin ? '' : 'none';
+      qs('.pill-ing', section).style.display  = calc.insights.ingredientShareHigh ? '' : 'none';
+      qs('.pill-pack', section).style.display = calc.insights.packagingShareHigh ? '' : 'none';
+    }
+
     function recalc(index){
       const section = qs(`[data-col="${index}"]`);
       const s = state[index];
@@ -359,12 +369,8 @@
       qs('.res-ppb', section).textContent = currency(calc.profitPerBatch);
       qs('.res-break', section).textContent = currency(calc.breakEvenAtTargetMargin);
       qs('.res-break-lbl', section).textContent = `Break-even @ ${Math.round(s.targetMargin*100)}%`;
-      qs('.res-ing-share', section).textContent = `${(calc.ingredientShare*100).toFixed(1)}%`;
 
-      // insights
-      qs('.pill-low', section).style.display  = calc.insights.lowMargin ? '' : 'none';
-      qs('.pill-ing', section).style.display  = calc.insights.ingredientShareHigh ? '' : 'none';
-      qs('.pill-pack', section).style.display = calc.insights.packagingShareHigh ? '' : 'none';
+      updateInsights(section, calc);
     }
 
     function recalcTotals(){
